@@ -3,7 +3,7 @@ from django.db.models import Model
 from django.http import HttpResponse, JsonResponse
 from django.utils import timezone
 from .serializers import *
-from .models import User, Question, Meta
+from .models import User, Question, Meta, Card
 from rest_framework.decorators import permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework import generics, status
@@ -302,5 +302,21 @@ class answer(generics.GenericAPIView):
             }, status=status.HTTP_404_NOT_FOUND)
 
 @permission_classes([isAuthenticated])
-class getCards(self, request):
-    
+class getCards(generics.GenericAPIView):
+    def get(self, request):
+        cards = list(Card.objects.filter())
+        
+        aval_cards = request.user.cardTypeA
+
+        cardList = []
+        cardList.append({'cardsAval': aval_cards})
+        for card in cards:
+            try:
+                if card.card_text:
+                    cardList.append({'text': card_text, 'index': card_num})
+            except:
+                continue
+
+        return JsonResponse({
+            'cards': cardList
+        })
