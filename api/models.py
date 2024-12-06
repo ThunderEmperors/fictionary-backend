@@ -18,6 +18,7 @@ class User(AbstractUser):
     time = models.DateTimeField(auto_now_add=True)
     calc_wait_time_from = models.DateTimeField(blank=True, null=True)
     picture = models.URLField(verbose_name="Avatar of the user: ", default=None, null=True)
+    cardTypeA = models.CharField(max_length=10, default="000000000")
 
 class Meta(models.Model):
     start_time = models.DateTimeField()
@@ -25,3 +26,5 @@ class Meta(models.Model):
 
 class Card(models.Model):
     card_type = models.IntegerField(default = 0)
+    card_num = models.IntegerField(default=5)
+    card_text = models.CharField(max_length=100)

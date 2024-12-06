@@ -300,3 +300,7 @@ class answer(generics.GenericAPIView):
             return JsonResponse({
                 'message': 'Question not found'
             }, status=status.HTTP_404_NOT_FOUND)
+
+@permission_classes([isAuthenticated])
+class getCards(self, request):
+    
