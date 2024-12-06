@@ -22,3 +22,6 @@ class User(AbstractUser):
 class Meta(models.Model):
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
+
+class Card(models.Model):
+    card_type = models.IntegerField(default = 0)
