@@ -44,5 +44,7 @@ urlpatterns = [
     path('leaderboard/', csrf_exempt(views.leaderboard), name='leaderboard'),
     path('accounts/get-social-token/',
          csrf_exempt(views.sociallogin_get_token.as_view()), name='social_token_generator'),
-    path('cards/', csrf_exempt(available_when_live(views.getCards.as_view())), name='getCards')
+    path('cards/', csrf_exempt(available_when_live(views.getCards.as_view())), name='getCards'),
+    path('change-card-status/', csrf_exempt(available_when_live(views.changeCardStatus.as_view())), name='changeCardStatus'),
+    path('get-user-coins/', csrf_exempt(available_when_live(views.getUserCoins.as_view())), name='getUserCoins'),
 ]

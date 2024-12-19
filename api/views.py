@@ -176,7 +176,14 @@ class question(generics.GenericAPIView):
             return JsonResponse({
                 'text': question.text,
                 'round': question.round,
-                'media': media
+                'ogmedia': question.ogmedia,
+                'year': question.year,
+                'country': question.country,
+                'language': question.language,
+                'show_country': request.user.show_country,
+                'show_media': request.user.show_media,
+                'show_language': request.user.show_language,
+                'show_year': request.user.show_year
             })
         except Model.DoesNotExist:
             return JsonResponse({
@@ -275,6 +282,11 @@ class answer(generics.GenericAPIView):
                     request.user.points += question.points
                     request.user.time = timezone.now()
                     request.user.calc_wait_time_from = None
+                    request.user.cons_aval += question.coins
+                    request.user.show_country = False
+                    request.user.show_media = False
+                    request.user.show_language = False
+                    request.user.show_year = False
 
                     request.user.save()
                     return JsonResponse({
@@ -287,6 +299,11 @@ class answer(generics.GenericAPIView):
                 request.user.points += question.points
                 request.user.time = timezone.now()
                 request.user.calc_wait_time_from = None
+                request.user.coins_aval += question.coins
+                request.user.show_country = False
+                request.user.show_media = False
+                request.user.show_language = False
+                request.user.show_year = False
 
                 request.user.save()
                 return JsonResponse({
@@ -301,7 +318,7 @@ class answer(generics.GenericAPIView):
                 'message': 'Question not found'
             }, status=status.HTTP_404_NOT_FOUND)
 
-@permission_classes([isAuthenticated])
+@permission_classes([IsAuthenticated])
 class getCards(generics.GenericAPIView):
     def get(self, request):
         cards = list(Card.objects.filter())
@@ -309,14 +326,58 @@ class getCards(generics.GenericAPIView):
         aval_cards = request.user.cardTypeA
 
         cardList = []
-        cardList.append({'cardsAval': aval_cards})
         for card in cards:
             try:
-                if card.card_text:
-                    cardList.append({'text': card_text, 'index': card_num})
+                cardList.append({'aval_cards': aval_cards, 'index': card.card_num, 'text': card.card_text, 'desc': card.card_desc, 'coins': card.card_coins})
             except:
                 continue
 
         return JsonResponse({
             'cards': cardList
+        })
+
+@permission_classes([IsAuthenticated])
+class changeCardStatus(generics.GenericAPIView):
+    def post(self, request):
+
+        aval_cards = request.user.cardTypeA
+        current_status = aval_cards[request.data.get('index')]
+        i = request.data.get('index')
+
+        new_status = '0'
+        if(current_status == '0'):
+            if(request.user.coins_aval >= request.data.get('coins')):
+                request.user.coins_aval = request.user.coins_aval - request.data.get('coins')
+                new_status = '1'
+        if(current_status == '1'):
+            if(i == 0):
+                user = User.objects.filter().order_by('-points', 'time')[:1].get()
+                if(user.points >= 10):
+                    user.points = user.points-10
+                user.save()
+            if(i == 1):
+                request.user.points = request.user.points + 10
+            if(i == 2):
+                request.user.show_country = True
+            if(i == 3):
+                request.user.show_language = True
+            if(i == 4):
+                request.user.show_year = True
+            if(i == 5):
+                request.user.show_media = True
+
+        aval_cards = aval_cards[:i] + new_status + aval_cards[i+1:]
+        request.user.cardTypeA = aval_cards
+        
+        request.user.save()
+        
+        print(User.objects.filter().order_by('-points', 'time')[:1].get().points)
+        return JsonResponse({'success': True})
+
+@permission_classes([IsAuthenticated])
+class getUserCoins(generics.GenericAPIView):
+    def get(self, request):
+        coins = request.user.coins_aval
+        return JsonResponse({
+            'coins' : coins
         })
