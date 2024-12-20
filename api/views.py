@@ -279,7 +279,7 @@ class answer(generics.GenericAPIView):
                 if answer in question.answer.split(','):
                     # Increment points
                     request.user.current_round = cround + 1
-                    request.user.points += question.points
+                    #request.user.points += question.points
                     request.user.time = timezone.now()
                     request.user.calc_wait_time_from = None
                     request.user.cons_aval += question.coins
@@ -287,6 +287,19 @@ class answer(generics.GenericAPIView):
                     request.user.show_media = False
                     request.user.show_language = False
                     request.user.show_year = False
+
+                    if(request.user.rf_start_time != None):
+                        diff = timezone.now() - request.user.rf_start_time
+                        if(diff > timedelta(minutes=5)):
+                            request.user.rf_active = False
+                            request.user.rf_start_time = None
+                            request.user.points += question.points
+                        else:
+                            request.user.points += question.points*2
+
+                    else:
+                        request.user.points += question.points
+
 
                     request.user.save()
                     return JsonResponse({
@@ -296,7 +309,7 @@ class answer(generics.GenericAPIView):
 
                 # Increment points
                 request.user.current_round = cround + 1
-                request.user.points += question.points
+                #request.user.points += question.points
                 request.user.time = timezone.now()
                 request.user.calc_wait_time_from = None
                 request.user.coins_aval += question.coins
@@ -304,6 +317,18 @@ class answer(generics.GenericAPIView):
                 request.user.show_media = False
                 request.user.show_language = False
                 request.user.show_year = False
+                
+                if(request.user.rf_start_time != None):
+                    diff = timezone.now() - request.user.rf_start_time
+                    if(diff > timedelta(minutes=5)):
+                        request.user.rf_active = False
+                        request.user.rf_start_time = None
+                        request.user.points += question.points
+                    else:
+                        request.user.points += question.points*2
+
+                else:
+                    request.user.points += question.points
 
                 request.user.save()
                 return JsonResponse({
@@ -365,6 +390,17 @@ class changeCardStatus(generics.GenericAPIView):
                 request.user.show_year = True
             if(i == 5):
                 request.user.show_media = True
+            if(i==6):
+                request.user.current_round = request.user.current_round +1
+                request.user.time = timezone.now()
+                request.user.calc_wait_time_from = None
+                request.user.show_country = False
+                request.user.show_media = False
+                request.user.show_language = False
+                request.user.show_year = False
+            if(i==7):
+                request.user.rf_active = True
+                request.user.rf_start_time = timezone.now()
 
         aval_cards = aval_cards[:i] + new_status + aval_cards[i+1:]
         request.user.cardTypeA = aval_cards

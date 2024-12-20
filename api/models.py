@@ -29,6 +29,8 @@ class User(AbstractUser):
     show_media = models.BooleanField(default = False)
     show_language = models.BooleanField(default = False)
     show_year = models.BooleanField(default = False)
+    rf_active = models.BooleanField(default = False)
+    rf_start_time = models.DateTimeField(blank=True, null=True)
 
 class Meta(models.Model):
     start_time = models.DateTimeField()
